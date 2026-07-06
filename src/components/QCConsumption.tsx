@@ -11,20 +11,33 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { InventoryDB, ConsumableItem, Cabinet, User } from '../types.js';
 import { apiFetch } from '../apiFallback.js';
+import { translations } from '../localization.js';
 
 interface QCConsumptionProps {
   db: InventoryDB;
   currentUser: User;
   onUpdateDB: (updatedFields: Partial<InventoryDB>) => Promise<void>;
+  language?: 'th' | 'en';
 }
 
-export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsumptionProps) {
+export default function QCConsumption({ db, currentUser, onUpdateDB, language = 'th' }: QCConsumptionProps) {
   const [selectedCabinetId, setSelectedCabinetId] = useState<string>('');
   const [selectedItemId, setSelectedItemId] = useState<string>('');
   const [qtyToConsume, setQtyToConsume] = useState<number>(1);
   const [purpose, setPurpose] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successFeedback, setSuccessFeedback] = useState<string | null>(null);
+
+  // Translation helper function
+  const t = (key: keyof typeof translations['en'], replaces?: Record<string, string | number>) => {
+    let text = translations[language][key] || translations['en'][key] || key;
+    if (replaces) {
+      Object.entries(replaces).forEach(([k, v]) => {
+        text = text.replace(`{${k}}`, String(v));
+      });
+    }
+    return text;
+  };
 
   // Cabinets that contain items owned by departments (or any cabinet)
   const availableCabinets = db.cabinets;
@@ -116,7 +129,7 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
       <div id="qc-header" className="bg-rose-400 p-5 rounded-2xl text-slate-950 border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-[10px] uppercase font-black text-slate-900 tracking-wider">Quality Control Division</p>
-          <h2 className="text-xl font-black uppercase tracking-tight">Material Pull & Logs</h2>
+          <h2 className="text-xl font-black uppercase tracking-tight">{t('qc_panel_title')}</h2>
         </div>
         <Package className="w-8 h-8 text-slate-900 shrink-0" />
       </div>
@@ -125,15 +138,19 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
       <div id="qc-withdraw-card" className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] space-y-4">
         <div className="flex items-center space-x-2 border-b-2 border-slate-200 pb-3">
           <Layers className="w-4 h-4 text-rose-500" />
-          <h3 className="font-black uppercase text-slate-900 text-xs">Request Consumable Pull</h3>
+          <h3 className="font-black uppercase text-slate-900 text-xs">{t('qc_panel_title')}</h3>
         </div>
+
+        <p className="text-xs text-slate-500 font-medium leading-relaxed">
+          {t('qc_intro')}
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* STEP 1: SELECT CABINET */}
           <div className="space-y-1.5">
             <label className="text-xs font-black text-slate-900 uppercase flex items-center gap-1.5">
               <span className="w-4 h-4 bg-rose-400 text-[10px] text-slate-950 rounded-full flex items-center justify-center font-black border border-slate-900 shadow-[1px_1px_0px_0px_rgba(15,23,42,1)]">1</span>
-              Select Cabinet Container
+              {t('tab_cabinets')}
             </label>
             <select
               required
@@ -141,7 +158,7 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
               onChange={handleCabinetChange}
               className="w-full px-3.5 py-2.5 border-2 border-slate-900 rounded-xl text-xs font-bold focus:ring-2 focus:ring-rose-500 focus:outline-hidden bg-white"
             >
-              <option value="" disabled>-- Select Storage Locker --</option>
+              <option value="" disabled>-- {t('tab_cabinets')} --</option>
               {availableCabinets.map(c => (
                 <option key={c.id} value={c.id}>{c.name} [📍 {c.location}]</option>
               ))}
@@ -152,7 +169,7 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
           <div className="space-y-1.5">
             <label className="text-xs font-black text-slate-900 uppercase flex items-center gap-1.5">
               <span className="w-4 h-4 bg-rose-400 text-[10px] text-slate-950 rounded-full flex items-center justify-center font-black border border-slate-900 shadow-[1px_1px_0px_0px_rgba(15,23,42,1)]">2</span>
-              Select Consumable Allocation
+              {t('qc_select_item')}
             </label>
             <select
               required
@@ -161,7 +178,7 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
               onChange={handleItemChange}
               className="w-full px-3.5 py-2.5 border-2 border-slate-900 rounded-xl text-xs font-bold focus:ring-2 focus:ring-rose-500 focus:outline-hidden disabled:bg-gray-50 disabled:text-gray-400 bg-white"
             >
-              <option value="" disabled>-- Select Item --</option>
+              <option value="" disabled>-- {t('tab_items')} --</option>
               {itemsInSelectedCabinet.map(item => (
                 <option key={item.id} value={item.id}>
                   {item.name} ({getDeptName(item.departmentId)} Allocation) - {item.currentStock} {item.unit} available
@@ -188,11 +205,11 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
                   />
                   <div>
                     <h5 className="font-black text-xs uppercase tracking-tight text-slate-900">{selectedItem.name}</h5>
-                    <p className="text-[10px] font-bold text-slate-400">Department: {getDeptName(selectedItem.departmentId)}</p>
+                    <p className="text-[10px] font-bold text-slate-400">{t('col_assigned_dept')}: {getDeptName(selectedItem.departmentId)}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Current Stock</p>
+                  <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider">{t('col_stock')}</p>
                   <p className="font-black text-slate-800 text-sm">{selectedItem.currentStock} {selectedItem.unit}</p>
                 </div>
               </motion.div>
@@ -203,7 +220,7 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
           <div className="space-y-1.5">
             <label className="text-xs font-black text-slate-900 uppercase flex items-center gap-1.5">
               <span className="w-4 h-4 bg-rose-400 text-[10px] text-slate-950 rounded-full flex items-center justify-center font-black border border-slate-900 shadow-[1px_1px_0px_0px_rgba(15,23,42,1)]">3</span>
-              Withdrawal Quantity
+              {t('qc_pull_qty', { unit: selectedItem?.unit || '' })}
             </label>
             <div className="flex items-center space-x-2.5">
               <button
@@ -239,14 +256,14 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
           <div className="space-y-1.5">
             <label className="text-xs font-black text-slate-900 uppercase flex items-center gap-1.5">
               <span className="w-4 h-4 bg-rose-400 text-[10px] text-slate-950 rounded-full flex items-center justify-center font-black border border-slate-900 shadow-[1px_1px_0px_0px_rgba(15,23,42,1)]">4</span>
-              Operational Purpose
+              {t('qc_purpose')}
             </label>
             <textarea
               required
               disabled={!selectedItemId}
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
-              placeholder="e.g. Line assembly replenishment shift B"
+              placeholder="..."
               rows={2}
               className="w-full px-3.5 py-2.5 border-2 border-slate-900 rounded-xl text-xs font-medium focus:ring-2 focus:ring-rose-500 focus:outline-hidden disabled:bg-gray-50 bg-white"
             />
@@ -259,11 +276,11 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
           >
             {isSubmitting ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" /> Transacting Withdrawal...
+                <RefreshCw className="w-4 h-4 animate-spin" /> {t('login_authenticating')}
               </>
             ) : (
               <>
-                <Minus className="w-4 h-4" /> Withdraw & Log Material
+                <Minus className="w-4 h-4" /> {t('btn_submit_pull')}
               </>
             )}
           </button>
@@ -274,12 +291,12 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
       <div id="recent-pulls" className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] space-y-4">
         <div className="flex items-center space-x-2 border-b-2 border-slate-200 pb-2.5">
           <History className="w-4 h-4 text-slate-800" />
-          <h4 className="font-black uppercase text-slate-900 text-xs">Recent Pulled Consumables</h4>
+          <h4 className="font-black uppercase text-slate-900 text-xs">{t('recent_activity')}</h4>
         </div>
         
         <div className="divide-y divide-gray-100">
           {relevantLogs.length === 0 ? (
-            <p className="text-xs text-slate-400 text-center py-4">No recent withdrawals logged.</p>
+            <p className="text-xs text-slate-400 text-center py-4">{t('no_recent_activity')}</p>
           ) : (
             relevantLogs.map(log => (
               <div key={log.id} className="py-2.5 text-xs flex flex-col space-y-1">
@@ -320,7 +337,7 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
                 <CheckCircle className="w-8 h-8 text-slate-950 animate-bounce" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-black uppercase tracking-tight text-slate-900 text-sm">Material Withdrawal Logged</h3>
+                <h3 className="font-black uppercase tracking-tight text-slate-900 text-sm">{t('pull_success')}</h3>
                 <p className="text-xs font-bold text-slate-400">{successFeedback}</p>
               </div>
             </motion.div>

@@ -11,15 +11,17 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { InventoryDB, ConsumableItem, Cabinet, User } from '../types.js';
 import { apiFetch } from '../apiFallback.js';
+import { translations } from '../localization.js';
 
 interface HelperCountProps {
   db: InventoryDB;
   currentUser: User;
   onUpdateDB: (updatedFields: Partial<InventoryDB>) => Promise<void>;
   preselectedCabinetId?: string;
+  language?: 'th' | 'en';
 }
 
-export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCabinetId }: HelperCountProps) {
+export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCabinetId, language = 'th' }: HelperCountProps) {
   const [selectedCabinet, setSelectedCabinet] = useState<Cabinet | null>(null);
   const [cabinetItems, setCabinetItems] = useState<ConsumableItem[]>([]);
   const [counts, setCounts] = useState<{ [itemId: string]: number }>({});
@@ -27,6 +29,17 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
   const [scannerFeedback, setScannerFeedback] = useState<string>('');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Translation helper function
+  const t = (key: keyof typeof translations['en'], replaces?: Record<string, string | number>) => {
+    let text = translations[language][key] || translations['en'][key] || key;
+    if (replaces) {
+      Object.entries(replaces).forEach(([k, v]) => {
+        text = text.replace(`{${k}}`, String(v));
+      });
+    }
+    return text;
+  };
 
   // If a cabinet was preselected (e.g., via QR Code link on Admin dashboard or URL param), auto-load it
   useEffect(() => {
@@ -153,7 +166,7 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
       <div id="helper-header" className="bg-emerald-400 p-5 rounded-2xl text-slate-950 border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] flex items-center justify-between">
         <div className="space-y-1">
           <p className="text-[10px] uppercase font-black text-slate-900 tracking-wider">Field Inspection Mode</p>
-          <h2 className="text-xl font-black uppercase tracking-tight">Consumable Count</h2>
+          <h2 className="text-xl font-black uppercase tracking-tight">{t('helper_panel_title')}</h2>
         </div>
         <Smartphone className="w-8 h-8 text-slate-900 shrink-0" />
       </div>
@@ -174,8 +187,8 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
                 <QrCode className="w-8 h-8 text-slate-900" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-black text-slate-900 text-sm uppercase">Scan Cabinet QR Code</h3>
-                <p className="text-xs font-medium text-slate-400">Position the cabinet QR label inside your phone camera grid to load the custom items catalog instantly.</p>
+                <h3 className="font-black text-slate-900 text-sm uppercase">{t('btn_print_qr')}</h3>
+                <p className="text-xs font-medium text-slate-400">{t('qr_tip')}</p>
               </div>
               <button
                 id="btn-trigger-scan"
@@ -186,30 +199,44 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
               </button>
             </div>
 
-            {/* Manual Selector Fallback */}
-            {currentUser.role !== 'helper' && (
-              <div id="manual-select-card" className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Search className="w-4 h-4 text-slate-800" />
-                  <h4 className="font-black uppercase text-slate-900 text-xs tracking-wider">Or Select Locker Manually</h4>
-                </div>
-                <div className="space-y-2">
-                  {db.cabinets.map(cab => (
-                    <button
-                      key={cab.id}
-                      onClick={() => handleSelectCabinet(cab)}
-                      className="w-full text-left p-3 flex justify-between items-center bg-slate-50 hover:bg-slate-100 rounded-xl border-2 border-slate-900 shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] transition-all active:translate-x-[1px] active:translate-y-[1px] active:shadow-[0px_0px_0px_0px_rgba(15,23,42,1)] text-xs cursor-pointer group"
-                    >
-                      <div>
-                        <p className="font-black text-slate-900 group-hover:text-emerald-800 uppercase tracking-tight">{cab.name}</p>
-                        <p className="text-[10px] font-bold text-slate-400 mt-0.5">📍 {cab.location}</p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-800 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  ))}
-                </div>
+            {/* Manual Selector Fallback - Code Input instead of listing cabinets */}
+            <div id="manual-select-card" className="bg-white p-5 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] space-y-4">
+              <div className="flex items-center space-x-2">
+                <Search className="w-4 h-4 text-slate-800" />
+                <h4 className="font-black uppercase text-slate-900 text-xs tracking-wider">{t('helper_cabinet_select')}</h4>
               </div>
-            )}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const code = (form.elements.namedItem('cabinetCode') as HTMLInputElement).value.trim();
+                  const matched = db.cabinets.find(c => c.id.toLowerCase() === code.toLowerCase() || c.name.toLowerCase().includes(code.toLowerCase()));
+                  if (matched) {
+                    handleSelectCabinet(matched);
+                  } else {
+                    alert('Invalid Cabinet Code. Please scan or enter a valid ID.');
+                  }
+                }}
+                className="flex gap-2"
+              >
+                <input
+                  required
+                  name="cabinetCode"
+                  type="text"
+                  placeholder="e.g. cab-yellow"
+                  className="w-full px-3 py-2 border-2 border-slate-900 rounded-xl text-xs font-bold uppercase focus:outline-hidden focus:ring-1 focus:ring-emerald-500 bg-white"
+                />
+                <button
+                  type="submit"
+                  className="px-4 bg-slate-900 text-white font-black rounded-xl text-xs uppercase tracking-tight border-2 border-slate-900 cursor-pointer hover:bg-slate-800"
+                >
+                  Load
+                </button>
+              </form>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-relaxed">
+                Available: <span className="font-mono text-slate-600 font-semibold lowercase">cab-wcf-cmt-blue, cab-wcf-cmt-orange, cab-rpe-rew, cab-wcm-dnm, cab-yellow</span>
+              </p>
+            </div>
           </motion.div>
         )}
 
@@ -276,7 +303,7 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
             {/* Loaded Cabinet Card */}
             <div className="bg-amber-300 p-4 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] flex justify-between items-center">
               <div>
-                <p className="text-[10px] uppercase font-black text-slate-900 tracking-wider">Locked Container Loaded</p>
+                <p className="text-[10px] uppercase font-black text-slate-900 tracking-wider">{t('helper_viewing_cabinet')}</p>
                 <h3 className="font-black text-slate-900 text-sm uppercase mt-0.5">{selectedCabinet.name}</h3>
                 <p className="text-xs font-bold text-slate-800">📍 {selectedCabinet.location}</p>
               </div>
@@ -287,6 +314,11 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
+            </div>
+
+            {/* Cabinet description */}
+            <div className="bg-emerald-50 border-2 border-slate-900 p-3.5 rounded-xl shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] text-xs text-slate-800 leading-relaxed">
+              {t('helper_desc')}
             </div>
 
             {/* Items List */}
@@ -315,10 +347,10 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
                           <p className="font-black text-slate-900 text-xs uppercase tracking-tight truncate">{item.name}</p>
                           <p className="text-[10px] font-bold text-slate-400 truncate">{getDeptName(item.departmentId)} Allocation</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[9px] text-slate-400 font-bold">Safe: {item.minThreshold} {item.unit}</span>
+                            <span className="text-[9px] text-slate-400 font-bold">{t('col_min')}: {item.minThreshold} {item.unit}</span>
                             {isLow && (
                               <span className="text-[8px] bg-rose-400 text-slate-950 font-black border border-slate-900 px-2 py-0.5 rounded shadow-[1px_1px_0px_0px_rgba(15,23,42,1)] shrink-0 uppercase">
-                                Low
+                                {t('status_low')}
                               </span>
                             )}
                           </div>
@@ -369,11 +401,11 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
                 >
                   {isSubmitting ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" /> Synchronizing Counts...
+                      <RefreshCw className="w-4 h-4 animate-spin" /> {t('login_authenticating')}
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4" /> Save & Sync to Admin Dashboard
+                      <Save className="w-4 h-4" /> {t('btn_submit_audit')}
                     </>
                   )}
                 </button>
@@ -402,8 +434,7 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
                 <CheckCircle className="w-8 h-8 text-slate-950 animate-bounce" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-black text-slate-900 text-sm uppercase">Counts Synchronized!</h3>
-                <p className="text-xs font-medium text-slate-400">Inventory stocks have been updated instantly in the main Admin dashboard.</p>
+                <h3 className="font-black text-slate-900 text-sm uppercase">{t('audit_success')}</h3>
               </div>
             </motion.div>
           </motion.div>

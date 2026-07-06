@@ -8,57 +8,114 @@ import { InventoryDB, User, Cabinet, Department, ConsumableItem, InspectionLog, 
 const initialDB: InventoryDB = {
   users: [
     { id: '1', email: 'pousan888@gmail.com', name: 'Pousan Admin', role: 'admin' },
-    { id: '2', email: 'helper1@gmail.com', name: 'John Helper', role: 'helper', departmentId: 'dept-1' },
-    { id: '3', email: 'qc1@gmail.com', name: 'Sarah QC', role: 'qc', departmentId: 'dept-2' }
+    { id: '2', email: 'helper1@gmail.com', name: 'John Helper', role: 'helper', departmentId: 'dept-wcf' },
+    { id: '3', email: 'qc1@gmail.com', name: 'Sarah QC', role: 'qc', departmentId: 'dept-wcf' }
   ],
   departments: [
-    { id: 'dept-1', name: 'Production' },
-    { id: 'dept-2', name: 'Maintenance' },
-    { id: 'dept-3', name: 'Safety' },
-    { id: 'dept-4', name: 'Laboratory' }
+    { id: 'dept-wcf', name: 'WCF CMT' },
+    { id: 'dept-rpe', name: 'RPE REW' },
+    { id: 'dept-wcm', name: 'WCM DNM' }
   ],
   cabinets: [
-    { id: 'cab-1', name: 'CAB-001 (Main Assembly Floor)', location: 'Zone A - East Wall' },
-    { id: 'cab-2', name: 'CAB-002 (Chemical Storage Bay)', location: 'Zone B - Hazmat Shed' },
-    { id: 'cab-3', name: 'CAB-003 (R&D Lab Annex)', location: 'Lab Building - Room 102' }
+    { id: 'cab-wcf-cmt-blue', name: 'WCF CMT (ตู้น้ำเงิน)', location: 'WCF CMT Site - ตู้น้ำเงิน' },
+    { id: 'cab-wcf-cmt-orange', name: 'WCF CMT (ตู้ส้ม)', location: 'WCF CMT Site - ตู้ส้ม' },
+    { id: 'cab-rpe-rew', name: 'RPE REW Cabinet', location: 'RPE REW Site' },
+    { id: 'cab-wcm-dnm', name: 'WCM DNM Cabinet', location: 'WCM DNM Site' },
+    { id: 'cab-yellow', name: 'ตู้เหลือง (Yellow Cabinet)', location: 'WCF CMT Site - ตู้เหลือง' }
   ],
   items: [
-    { id: 'item-1', name: 'Nitrile Gloves (M)', imageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-3', cabinetId: 'cab-1', currentStock: 150, minThreshold: 100, previousStock: 180, unit: 'pcs' },
-    { id: 'item-2', name: 'Safety Goggles', imageUrl: 'https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-3', cabinetId: 'cab-1', currentStock: 15, minThreshold: 20, previousStock: 22, unit: 'pcs' },
-    { id: 'item-3', name: 'ESD Grounding Wrist Strap', imageUrl: 'https://images.unsplash.com/photo-1517059224940-d4af9eec41b7?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-1', cabinetId: 'cab-1', currentStock: 8, minThreshold: 10, previousStock: 12, unit: 'pcs' },
-    { id: 'item-4', name: 'IPA Wipes (99%)', imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-4', cabinetId: 'cab-3', currentStock: 45, minThreshold: 30, previousStock: 50, unit: 'boxes' },
-    { id: 'item-5', name: 'Multi-Purpose Lubricant', imageUrl: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-2', cabinetId: 'cab-2', currentStock: 12, minThreshold: 10, previousStock: 15, unit: 'bottles' },
-    { id: 'item-6', name: 'Chemical Sorbent Pads', imageUrl: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-3', cabinetId: 'cab-2', currentStock: 5, minThreshold: 15, previousStock: 18, unit: 'packs' },
-    { id: 'item-7', name: 'Solder Wire (60/40)', imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-1', cabinetId: 'cab-3', currentStock: 25, minThreshold: 15, previousStock: 24, unit: 'rolls' }
+    // WCF CMT - ตู้น้ำเงิน (cab-wcf-cmt-blue)
+    { id: 'item-cover-bag', name: 'COVER BAG (ถุงลูกเต๋า)', imageUrl: 'https://images.unsplash.com/photo-1595246140625-573b715d11dc?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 8, minThreshold: 5, previousStock: 8, unit: 'PK' },
+    { id: 'item-clear-bag', name: 'Clear Bag (ถุงใส)', imageUrl: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 7, minThreshold: 5, previousStock: 7, unit: 'EA' },
+    { id: 'item-plastic-wrap-blue', name: 'PLASTIC WRAP (พลาสติกแรป)', imageUrl: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 12, minThreshold: 8, previousStock: 12, unit: 'EA' },
+    { id: 'item-plastic-green-pet-blue', name: 'PLASTIC GREEN PET (แบนเขียว)', imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b76?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 6, minThreshold: 5, previousStock: 6, unit: 'EA' },
+    { id: 'item-plastic-grip-blue', name: 'PLASTIC GRIP (ลูกแม็ก)', imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 4, minThreshold: 2, previousStock: 4, unit: 'Box' },
+    { id: 'item-cloth-tape-blue', name: 'CLOTH TAPE (เทปผ้า/กระดาษ)', imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 15, minThreshold: 10, previousStock: 15, unit: 'EA' },
+    { id: 'item-brown-tape-blue', name: 'BROWN PACKING TAPE (เทปน้ำตาล)', imageUrl: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 14, minThreshold: 10, previousStock: 14, unit: 'EA' },
+    { id: 'item-electrical-tape-blue', name: 'ELECTRICAL TAPE (เทปพันสายไฟ)', imageUrl: 'https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 8, minThreshold: 5, previousStock: 8, unit: 'EA' },
+    { id: 'item-manila-rope-blue', name: 'Manila Rope (เชือกแท็กไลน์)', imageUrl: 'https://images.unsplash.com/photo-1511216113906-8f57bb83e776?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 3, minThreshold: 2, previousStock: 3, unit: 'EA' },
+    { id: 'item-paint-brush-1-blue', name: 'Paint Brush 1” (แปรงทาสี 1 นิ้ว)', imageUrl: 'https://images.unsplash.com/photo-1520189124422-c40606349e97?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 1, minThreshold: 1, previousStock: 1, unit: 'EA' },
+    { id: 'item-paint-brush-2-blue', name: 'Paint Brush 2” (แปรงทาสี 2 นิ้ว)', imageUrl: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-blue', currentStock: 2, minThreshold: 1, previousStock: 2, unit: 'EA' },
+
+    // WCF CMT - ตู้ส้ม (cab-wcf-cmt-orange)
+    { id: 'item-sample-bottle-orange', name: 'Sample Bottle 1 L. (ขวดเก็บตัวอย่าง 1 ลิตร)', imageUrl: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 35, minThreshold: 20, previousStock: 35, unit: 'EA' },
+    { id: 'item-plastic-bucket-orange', name: 'Plastic Bucket 20 L. (ถังพลาสติก 20 ลิตร)', imageUrl: 'https://images.unsplash.com/photo-1595246140625-573b715d11dc?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 12, minThreshold: 10, previousStock: 12, unit: 'EA' },
+    { id: 'item-gallon-5l-orange', name: 'Gallon 5 L. w/ lid (ถังแกลลอน 5 ลิตร พร้อมฝา)', imageUrl: 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 8, minThreshold: 5, previousStock: 8, unit: 'EA' },
+    { id: 'item-gallon-20l-orange', name: 'Gallon 20 L. w/ lid (ถังแกลลอน 20 ลิตร พร้อมฝา)', imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 7, minThreshold: 5, previousStock: 7, unit: 'EA' },
+    { id: 'item-brilube-30-orange', name: 'BRILUBE 30 Aerosol 400 ml. (น้ำมันหล่อลื่น)', imageUrl: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 2, minThreshold: 1, previousStock: 2, unit: 'EA' },
+    { id: 'item-brilube-70-orange', name: 'BRILUBE 70 ADVANCE Wire Rope 5 kg.', imageUrl: 'https://images.unsplash.com/photo-1541535881962-e668f2c36a3d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 1, minThreshold: 1, previousStock: 1, unit: 'PAIL' },
+    { id: 'item-duct-tape-avon-orange', name: 'DUCT TAPE, AVON, GRAY (เทปผ้ายี่ห้อ AVON สีเทา)', imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 15, minThreshold: 10, previousStock: 15, unit: 'EA' },
+    { id: 'item-split-cotter-m4-orange', name: 'Steel Split Cotter Pin (M4*40) (ปิ่นเหล็ก)', imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 12, minThreshold: 10, previousStock: 12, unit: 'EA' },
+    { id: 'item-split-cotter-m5-orange', name: 'Steel Split Cotter Pin (M5*50) (ปิ่นเหล็ก)', imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 14, minThreshold: 10, previousStock: 14, unit: 'EA' },
+    { id: 'item-wooden-pallet-orange', name: 'Wooden pallet (พาเลทไม้)', imageUrl: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 11, minThreshold: 10, previousStock: 11, unit: 'EA' },
+    { id: 'item-color-ral-2008-1l-orange', name: 'COLOR RAL 2008 Orange (1 liter) (สีส้ม)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 8, minThreshold: 6, previousStock: 8, unit: 'CAN' },
+    { id: 'item-color-ral-2008-4l-orange', name: 'COLORRAL 2008 Orange (4 liter) (สีส้ม)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-wcf-cmt-orange', currentStock: 3, minThreshold: 2, previousStock: 3, unit: 'PAIL' },
+
+    // RPE REW (cab-rpe-rew)
+    { id: 'item-plastic-wrap-rpe', name: 'PLASTIC WRAP (พลาสติกแรป)', imageUrl: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-rpe', cabinetId: 'cab-rpe-rew', currentStock: 10, minThreshold: 8, previousStock: 10, unit: 'EA' },
+    { id: 'item-plastic-green-pet-rpe', name: 'PLASTIC PET PACKING, GREEN (แบนเขียว)', imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b76?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-rpe', cabinetId: 'cab-rpe-rew', currentStock: 7, minThreshold: 5, previousStock: 7, unit: 'ROLL' },
+    { id: 'item-plastic-grip-rpe', name: 'GRIP PLASTIC (ลูกแม็ก)', imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-rpe', cabinetId: 'cab-rpe-rew', currentStock: 3, minThreshold: 2, previousStock: 3, unit: 'BX' },
+    { id: 'item-manila-rope-rpe', name: 'ROPE, MANILA (เชือกแท็กไลน์)', imageUrl: 'https://images.unsplash.com/photo-1511216113906-8f57bb83e776?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-rpe', cabinetId: 'cab-rpe-rew', currentStock: 4, minThreshold: 2, previousStock: 4, unit: 'EA' },
+    { id: 'item-duct-tape-rpe', name: 'DUCT TAPE (เทปผ้า)', imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-rpe', cabinetId: 'cab-rpe-rew', currentStock: 12, minThreshold: 10, previousStock: 12, unit: 'EA' },
+    { id: 'item-silicone-rpe', name: 'SILICONE SEALANT SISTA S16 (ซิลิโคน)', imageUrl: 'https://images.unsplash.com/photo-1595246140625-573b715d11dc?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-rpe', cabinetId: 'cab-rpe-rew', currentStock: 6, minThreshold: 5, previousStock: 6, unit: 'EA' },
+    { id: 'item-color-ral-2008-4l-rpe', name: 'COLOR RAL 2008 Orange (4 liter) (สีส้ม)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-rpe', cabinetId: 'cab-rpe-rew', currentStock: 2, minThreshold: 2, previousStock: 2, unit: 'PAIL' },
+    { id: 'item-sticker-rpe', name: 'A4 STICKER (สติกเกอร์ขนาด A4)', imageUrl: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-rpe', cabinetId: 'cab-rpe-rew', currentStock: 8, minThreshold: 5, previousStock: 8, unit: 'PK' },
+
+    // WCM DNM (cab-wcm-dnm)
+    { id: 'item-plastic-wrap-wcm', name: 'PLASTIC WRAP (พลาสติกแรป)', imageUrl: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcm', cabinetId: 'cab-wcm-dnm', currentStock: 11, minThreshold: 8, previousStock: 11, unit: 'EA' },
+    { id: 'item-plastic-green-pet-wcm', name: 'PLASTIC PET PACKING, GREEN (แบนเขียว)', imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b76?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcm', cabinetId: 'cab-wcm-dnm', currentStock: 6, minThreshold: 5, previousStock: 6, unit: 'ROLL' },
+    { id: 'item-plastic-grip-wcm', name: 'GRIP PLASTIC (ลูกแม็ก)', imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcm', cabinetId: 'cab-wcm-dnm', currentStock: 4, minThreshold: 2, previousStock: 4, unit: 'BX' },
+    { id: 'item-manila-rope-wcm', name: 'ROPE, MANILA (เชือกแท็กไลน์)', imageUrl: 'https://images.unsplash.com/photo-1511216113906-8f57bb83e776?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcm', cabinetId: 'cab-wcm-dnm', currentStock: 3, minThreshold: 2, previousStock: 3, unit: 'EA' },
+    { id: 'item-duct-tape-wcm', name: 'DUCT TAPE (เทปผ้า)', imageUrl: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcm', cabinetId: 'cab-wcm-dnm', currentStock: 16, minThreshold: 10, previousStock: 16, unit: 'EA' },
+    { id: 'item-silicone-wcm', name: 'SILICONE SEALANT SISTA S16 (ซิลิโคน)', imageUrl: 'https://images.unsplash.com/photo-1595246140625-573b715d11dc?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcm', cabinetId: 'cab-wcm-dnm', currentStock: 7, minThreshold: 5, previousStock: 7, unit: 'EA' },
+    { id: 'item-color-ral-2008-4l-wcm', name: 'COLORRAL 2008 Orange (4 liter) (สีส้ม)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcm', cabinetId: 'cab-wcm-dnm', currentStock: 3, minThreshold: 2, previousStock: 3, unit: 'PAIL' },
+    { id: 'item-sticker-wcm', name: 'A4 STICKER (สติกเกอร์ขนาด A4)', imageUrl: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcm', cabinetId: 'cab-wcm-dnm', currentStock: 5, minThreshold: 5, previousStock: 5, unit: 'PK' },
+
+    // ตู้เหลือง (cab-yellow)
+    { id: 'item-spray-fm-orange', name: 'FM AUTO SPRAY RAL 2008 (ORANGE) (สีสเปรย์ส้ม)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 7, minThreshold: 5, previousStock: 7, unit: 'EA' },
+    { id: 'item-spray-kobe-green', name: 'KOBE SPRAY F5 (GREEN) (สีสเปรย์เขียว)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 4, minThreshold: 2, previousStock: 4, unit: 'EA' },
+    { id: 'item-spray-kobe-blue', name: 'KOBE SPRAY 916 (DARK BLUE) (สีสเปรย์น้ำเงิน)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 10, minThreshold: 5, previousStock: 10, unit: 'EA' },
+    { id: 'item-spray-kobe-yellow', name: 'KOBE SPRAY 918 (YELLOW) (สีสเปรย์เหลือง)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 18, minThreshold: 10, previousStock: 18, unit: 'EA' },
+    { id: 'item-spray-kobe-white', name: 'KOBE SPRAY 900 (WHITE) (สีสเปรย์ขาว)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 62, minThreshold: 50, previousStock: 62, unit: 'EA' },
+    { id: 'item-spray-atm-f4', name: 'ATM FLUORESCENT F4 (สีสเปรย์ ATM)', imageUrl: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 8, minThreshold: 5, previousStock: 8, unit: 'EA' },
+    { id: 'item-paint-fm-orange', name: 'FM PRIME RAL 2008 (ORANGE) (สีไพรม์ส้ม)', imageUrl: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 2, minThreshold: 2, previousStock: 2, unit: 'EA' },
+    { id: 'item-paint-toa-orange', name: 'TOA GLIPTON RAL 2008 (ORANGE) (สีกลิปตันส้ม)', imageUrl: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 1, minThreshold: 1, previousStock: 1, unit: 'EA' },
+    { id: 'item-paint-lobster-blue', name: 'LOBSTER 977 (RIVER BLUE) (สีน้ำเงินริเวอร์บลู)', imageUrl: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 2, minThreshold: 2, previousStock: 2, unit: 'EA' },
+    { id: 'item-paint-toa-road-yellow', name: 'TOA ROAD LINE PAINT 703 (สีตีเส้นเหลือง)', imageUrl: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 2, minThreshold: 2, previousStock: 2, unit: 'EA' },
+    { id: 'item-paint-toa-roof-green', name: 'TOA ROOF PAINT R390 (GREEN) (สีทาหลังคา)', imageUrl: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 3, minThreshold: 2, previousStock: 3, unit: 'EA' },
+    { id: 'item-paint-toa-roof-grey', name: 'TOA ROOF PAINT R800 (DARK GREY) (สีทาหลังคา)', imageUrl: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 2, minThreshold: 2, previousStock: 2, unit: 'EA' },
+    { id: 'item-paint-toa-grey-primer', name: 'TOA GREY PRIMER (GREY) (สีเกรย์ไพร์เมอร์)', imageUrl: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 1, minThreshold: 1, previousStock: 1, unit: 'EA' },
+    { id: 'item-paint-jotun-pink', name: 'JOTUN RAL 4003 (PINK) (สีโจตันชมพู)', imageUrl: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 1, minThreshold: 1, previousStock: 1, unit: 'EA' },
+    { id: 'item-paint-jotun-hardener', name: 'JOTUN PENGUARD HARDENER (CLEAR) (ฮาร์ดเดนเนอร์)', imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 18, minThreshold: 15, previousStock: 18, unit: 'EA' },
+    { id: 'item-paint-sogo-thinner', name: 'SOGO THINNER (โซโก้ ทินเนอร์)', imageUrl: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 1, minThreshold: 1, previousStock: 1, unit: 'EA' },
+    { id: 'item-paint-brilube-70-wire', name: 'BRILUBE 70 (WIRE ROPE LUBRICANT) (บรีลูบ)', imageUrl: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=150&auto=format&fit=crop&q=60', departmentId: 'dept-wcf', cabinetId: 'cab-yellow', currentStock: 2, minThreshold: 1, previousStock: 2, unit: 'EA' }
   ],
   inspectionLogs: [
     {
       id: 'log-1',
-      cabinetId: 'cab-1',
+      cabinetId: 'cab-wcf-cmt-blue',
       userId: '2',
       userName: 'John Helper',
       timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
       itemsCounted: [
-        { itemId: 'item-1', countedQuantity: 150, previousQuantity: 180 },
-        { itemId: 'item-2', countedQuantity: 15, previousQuantity: 22 },
-        { itemId: 'item-3', countedQuantity: 8, previousQuantity: 12 }
+        { itemId: 'item-cover-bag', countedQuantity: 8, previousQuantity: 8 }
       ]
     }
   ],
   consumptionLogs: [
     {
       id: 'cons-1',
-      itemId: 'item-1',
-      itemName: 'Nitrile Gloves (M)',
-      cabinetId: 'cab-1',
-      cabinetName: 'CAB-001 (Main Assembly Floor)',
+      itemId: 'item-cover-bag',
+      itemName: 'COVER BAG (ถุงลูกเต๋า)',
+      cabinetId: 'cab-wcf-cmt-blue',
+      cabinetName: 'WCF CMT (ตู้น้ำเงิน)',
       userId: '3',
       userName: 'Sarah QC',
-      departmentId: 'dept-3',
-      departmentName: 'Safety',
+      departmentId: 'dept-wcf',
+      departmentName: 'WCF CMT',
       timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-      quantityConsumed: 10,
-      purpose: 'Regular assembly shift replenishment'
+      quantityConsumed: 2,
+      purpose: 'Regular production packaging count audit'
     }
   ]
 };
@@ -176,6 +233,26 @@ export async function handleMockFetch(url: string, init?: RequestInit): Promise<
       return makeResponse({ error: 'Not authenticated' }, 401);
     }
     return makeResponse(user);
+  }
+
+  // 4.5. POST /api/users/language
+  if (url === '/api/users/language' && method === 'POST') {
+    const user = getAuthenticatedUser(userEmailHeader);
+    if (!user) {
+      return makeResponse({ error: 'Not authenticated' }, 401);
+    }
+    const { language } = body || {};
+    if (language !== 'th' && language !== 'en') {
+      return makeResponse({ error: 'Invalid language' }, 400);
+    }
+    const db = readDB();
+    const dbUser = db.users.find(u => u.id === user.id);
+    if (dbUser) {
+      dbUser.language = language;
+      writeDB(db);
+      return makeResponse({ success: true, language: dbUser.language });
+    }
+    return makeResponse({ error: 'User not found' }, 404);
   }
 
   // 5. GET /api/users

@@ -344,6 +344,26 @@ app.delete('/api/users/:id', (req, res) => {
   res.json({ message: 'User deleted successfully' });
 });
 
+// Update user language preference
+app.post('/api/users/language', (req, res) => {
+  const user = getAuthenticatedUser(req);
+  if (!user) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  const { language } = req.body;
+  if (language !== 'th' && language !== 'en') {
+    return res.status(400).json({ error: 'Invalid language' });
+  }
+  const db = readDB();
+  const dbUser = db.users.find(u => u.id === user.id);
+  if (dbUser) {
+    dbUser.language = language;
+    writeDB(db);
+    return res.json({ success: true, language: dbUser.language });
+  }
+  res.status(404).json({ error: 'User not found' });
+});
+
 // Cabinets CRUD (Admin only)
 app.get('/api/cabinets', (req, res) => {
   const db = readDB();

@@ -15,20 +15,33 @@ import {
 } from 'recharts';
 import { InventoryDB, ConsumableItem, Cabinet, Department, User, UserRole } from '../types.js';
 import { apiFetch } from '../apiFallback.js';
+import { translations } from '../localization.js';
 
 interface AdminDashboardProps {
   db: InventoryDB;
   currentUser: User;
   onUpdateDB: (updatedFields: Partial<InventoryDB>) => Promise<void>;
+  language?: 'th' | 'en';
 }
 
 type TabType = 'overview' | 'items' | 'cabinets' | 'departments' | 'users';
 
-export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDashboardProps) {
+export default function AdminDashboard({ db, currentUser, onUpdateDB, language = 'th' }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [editingItem, setEditingItem] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<TabType | null>(null);
+
+  // Translation helper function
+  const t = (key: keyof typeof translations['en'], replaces?: Record<string, string | number>) => {
+    let text = translations[language][key] || translations['en'][key] || key;
+    if (replaces) {
+      Object.entries(replaces).forEach(([k, v]) => {
+        text = text.replace(`{${k}}`, String(v));
+      });
+    }
+    return text;
+  };
 
   // Stats
   const totalItems = db.items.length;
@@ -295,13 +308,17 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
             key={tab}
             id={`btn-tab-${tab}`}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2.5 font-medium text-sm transition-all border-b-2 rounded-t-lg capitalize cursor-pointer ${
+            className={`px-4 py-2.5 font-medium text-sm transition-all border-b-2 rounded-t-lg cursor-pointer ${
               activeTab === tab
-                ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50'
+                ? 'border-emerald-600 text-emerald-700 bg-emerald-50/50 font-bold'
                 : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'
             }`}
           >
-            {tab}
+            {tab === 'overview' ? t('tab_overview') :
+             tab === 'items' ? t('tab_items') :
+             tab === 'cabinets' ? t('tab_cabinets') :
+             tab === 'departments' ? t('tab_departments') :
+             t('tab_users')}
           </button>
         ))}
       </div>
@@ -316,7 +333,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
                 <Database className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Total Consumables</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('stat_total_items')}</p>
                 <p className="text-2xl font-semibold text-gray-800">{totalItems}</p>
               </div>
             </div>
@@ -326,7 +343,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
                 <AlertTriangle className="w-6 h-6 animate-pulse" />
               </div>
               <div>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Low Stock Alerts</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('stat_low_stock')}</p>
                 <p className={`text-2xl font-semibold ${lowStockItems.length > 0 ? 'text-amber-700 font-bold' : 'text-gray-800'}`}>{lowStockItems.length}</p>
               </div>
             </div>
@@ -336,7 +353,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
                 <Layers className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Cabinets Configured</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('stat_total_cabinets')}</p>
                 <p className="text-2xl font-semibold text-gray-800">{totalCabinets}</p>
               </div>
             </div>
@@ -346,7 +363,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
                 <UserCheck className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Personnel Registered</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('stat_total_users')}</p>
                 <p className="text-2xl font-semibold text-gray-800">{totalUsers}</p>
               </div>
             </div>
@@ -358,7 +375,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
               <div className="flex items-start space-x-3">
                 <ShieldAlert className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
                 <div>
-                  <h4 className="font-semibold text-amber-900 text-sm">Critical Inventory Replenishment Alert</h4>
+                  <h4 className="font-semibold text-amber-900 text-sm">{t('err_low_stock_alert')}</h4>
                   <p className="text-xs text-amber-700">The following items have dropped below their minimum safe thresholds. Field counts require attention.</p>
                 </div>
               </div>
@@ -376,8 +393,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
           <div id="charts-and-recent" className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div id="chart-panel" className="bg-white p-5 rounded-xl border border-gray-100 shadow-xs lg:col-span-2 space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="font-semibold text-gray-800 text-sm">Stock Cycle Variance Analysis</h3>
-                <span className="text-xs text-gray-400 bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100">Current vs Last Count vs Safe Margin</span>
+                <h3 className="font-semibold text-gray-800 text-xs truncate max-w-lg">{t('chart_title')}</h3>
               </div>
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -387,17 +403,17 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
                     <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
                     <Tooltip contentStyle={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '11px' }} />
                     <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                    <Bar dataKey="Previous" fill="#94a3b8" radius={[4, 4, 0, 0]} name="Prev Count" />
-                    <Bar dataKey="Current" fill="#059669" radius={[4, 4, 0, 0]} name="Current Stock" />
-                    <Bar dataKey="Minimum" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Min Threshold" />
+                    <Bar dataKey="Previous" fill="#94a3b8" radius={[4, 4, 0, 0]} name={t('chart_previous')} />
+                    <Bar dataKey="Current" fill="#059669" radius={[4, 4, 0, 0]} name={t('chart_current')} />
+                    <Bar dataKey="Minimum" fill="#f59e0b" radius={[4, 4, 0, 0]} name={t('chart_min')} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             <div id="cabinet-qr-panel" className="bg-white p-5 rounded-xl border border-gray-100 shadow-xs space-y-4">
-              <h3 className="font-semibold text-gray-800 text-sm">Cabinet QR-Code Generators</h3>
-              <p className="text-xs text-gray-500">Generate and print unique QR Codes for field inspection labels.</p>
+              <h3 className="font-semibold text-gray-800 text-sm">{t('cabinet_list')}</h3>
+              <p className="text-xs text-gray-500">{t('qr_tip')}</p>
               
               <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
                 {db.cabinets.map(cabinet => {
@@ -463,7 +479,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
             <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-xs space-y-4">
               <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-1.5">
                 <ClipboardCheck className="w-4 h-4 text-emerald-600" />
-                Recent Inspection Counts (Sync History)
+                {t('recent_activity')} - {t('activity_inspection')}
               </h3>
               <div className="divide-y divide-gray-100 max-h-64 overflow-y-auto pr-1">
                 {db.inspectionLogs.length === 0 ? (
@@ -499,7 +515,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
             <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-xs space-y-4">
               <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 text-rose-500" />
-                QC Material Pulls (Consumption History)
+                {t('recent_activity')} - {t('activity_consumption')}
               </h3>
               <div className="divide-y divide-gray-100 max-h-64 overflow-y-auto pr-1">
                 {db.consumptionLogs.length === 0 ? (
@@ -533,7 +549,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
         <div id="items-tab-content" className="bg-white rounded-xl border border-gray-100 shadow-xs overflow-hidden animate-fade-in space-y-4 p-5">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="font-semibold text-gray-800 text-sm">Consumables Master Catalog</h3>
+              <h3 className="font-semibold text-gray-800 text-sm">{t('tab_items')}</h3>
               <p className="text-xs text-gray-500">Define active items, safe stock lines, and owning departments.</p>
             </div>
             <button
@@ -541,7 +557,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
               onClick={() => triggerAddModal('items')}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
             >
-              <Plus className="w-4 h-4" /> Add Consumable
+              <Plus className="w-4 h-4" /> {t('btn_add_item')}
             </button>
           </div>
 
@@ -549,12 +565,12 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-gray-400 font-semibold text-xs border-b border-gray-100 uppercase tracking-wider">
-                  <th className="p-3">Item Details</th>
-                  <th className="p-3">Cabinet location</th>
-                  <th className="p-3">Owning Department</th>
-                  <th className="p-3 text-right">Current Stock</th>
-                  <th className="p-3 text-right">Min Safe Line</th>
-                  <th className="p-3 text-center">Actions</th>
+                  <th className="p-3">{t('col_name')}</th>
+                  <th className="p-3">{t('col_cabinet')}</th>
+                  <th className="p-3">{t('col_dept')}</th>
+                  <th className="p-3 text-right">{t('col_stock')}</th>
+                  <th className="p-3 text-right">{t('col_min')}</th>
+                  <th className="p-3 text-center">{t('col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-xs">
@@ -619,14 +635,14 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
         <div id="cabinets-tab-content" className="bg-white rounded-xl border border-gray-100 shadow-xs p-5 animate-fade-in space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="font-semibold text-gray-800 text-sm">Cabinet Mapping</h3>
+              <h3 className="font-semibold text-gray-800 text-sm">{t('tab_cabinets')}</h3>
               <p className="text-xs text-gray-500">Configure physical containment lockers, locations, and inspection states.</p>
             </div>
             <button
               onClick={() => triggerAddModal('cabinets')}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
             >
-              <Plus className="w-4 h-4" /> Add Cabinet
+              <Plus className="w-4 h-4" /> {t('btn_add_cabinet')}
             </button>
           </div>
 
@@ -675,14 +691,14 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
         <div id="departments-tab-content" className="bg-white rounded-xl border border-gray-100 shadow-xs p-5 animate-fade-in space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="font-semibold text-gray-800 text-sm">Department Ownership Lines</h3>
+              <h3 className="font-semibold text-gray-800 text-sm">{t('tab_departments')}</h3>
               <p className="text-xs text-gray-500">Add operational teams who own shared inventory allocations.</p>
             </div>
             <button
               onClick={() => triggerAddModal('departments')}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
             >
-              <Plus className="w-4 h-4" /> Add Department
+              <Plus className="w-4 h-4" /> {t('btn_add_dept')}
             </button>
           </div>
 
@@ -735,14 +751,14 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
         <div id="users-tab-content" className="bg-white rounded-xl border border-gray-100 shadow-xs p-5 animate-fade-in space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="font-semibold text-gray-800 text-sm">Personnel Roster & RBAC Roles</h3>
+              <h3 className="font-semibold text-gray-800 text-sm">{t('tab_users')}</h3>
               <p className="text-xs text-gray-500">Manage user access authorizations and Google Authentication bindings.</p>
             </div>
             <button
               onClick={() => triggerAddModal('users')}
               className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
             >
-              <Plus className="w-4 h-4" /> Add Member
+              <Plus className="w-4 h-4" /> {t('btn_add_user')}
             </button>
           </div>
 
@@ -750,11 +766,11 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 text-gray-400 font-semibold text-xs border-b border-gray-100 uppercase tracking-wider">
-                  <th className="p-3">User</th>
-                  <th className="p-3">Google Account (Email)</th>
-                  <th className="p-3">Authorized Role</th>
-                  <th className="p-3">Department Scope</th>
-                  <th className="p-3 text-center">Actions</th>
+                  <th className="p-3">{t('col_user_name')}</th>
+                  <th className="p-3">{t('col_email')}</th>
+                  <th className="p-3">{t('col_role')}</th>
+                  <th className="p-3">{t('col_dept')}</th>
+                  <th className="p-3 text-center">{t('col_actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-xs">

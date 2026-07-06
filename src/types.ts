@@ -11,6 +11,7 @@ export interface User {
   name: string;
   role: UserRole;
   departmentId?: string; // helpers or QCs might be assigned to a department
+  language?: 'th' | 'en'; // user preferred language
 }
 
 export interface Cabinet {
