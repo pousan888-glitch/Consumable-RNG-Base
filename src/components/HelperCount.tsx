@@ -136,23 +136,54 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
     }
   };
 
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+
+  // Manage camera stream when isScanning is toggled
+  useEffect(() => {
+    let activeStream: MediaStream | null = null;
+    if (isScanning) {
+      setCameraError(null);
+      setScannerFeedback('Initializing camera sensor...');
+      
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(s => {
+          activeStream = s;
+          setStream(s);
+          if (videoRef.current) {
+            videoRef.current.srcObject = s;
+          }
+          setScannerFeedback('Camera active. Align QR code inside reticle.');
+        })
+        .catch(err => {
+          console.error('Camera access error:', err);
+          setCameraError(err.message || 'Could not access camera. Please allow permission.');
+          setScannerFeedback('Camera access error. Use simulator fallback below.');
+        });
+    } else {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        setStream(null);
+      }
+    }
+
+    return () => {
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [isScanning]);
+
   // Simulate scanning QR Code
   const startScanningSim = () => {
     setIsScanning(true);
-    setScannerFeedback('Initializing camera sensor...');
-    
-    setTimeout(() => {
-      setScannerFeedback('Focusing lens on Cabinet Label...');
-    }, 1000);
-
-    setTimeout(() => {
-      setScannerFeedback('QR code detected! Aligning grid...');
-    }, 2000);
   };
 
   const completeScanningSim = (cabinet: Cabinet) => {
     setScannerFeedback('Decoding Payload...');
     setTimeout(() => {
+      setIsScanning(false);
       handleSelectCabinet(cabinet);
     }, 600);
   };
@@ -249,8 +280,30 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
             exit={{ opacity: 0, scale: 0.95 }}
             className="bg-slate-900 rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] aspect-square flex flex-col justify-between p-5 text-white relative border-2 border-slate-900"
           >
+            {/* Real Camera Video Stream */}
+            {!cameraError ? (
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-950 text-center space-y-2">
+                <AlertTriangle className="w-8 h-8 text-amber-500" />
+                <p className="text-[11px] text-slate-300 font-bold">{cameraError}</p>
+                <p className="text-[9px] text-slate-500 leading-normal">
+                  Iframe camera access might be blocked. Please use the simulator buttons below to test!
+                </p>
+              </div>
+            )}
+
+            {/* Dark overlay for scan scanning effect */}
+            <div className="absolute inset-0 bg-slate-950/20 pointer-events-none" />
+
             {/* Animated Laser Scanning Line */}
-            <div className="absolute inset-x-0 h-0.5 bg-emerald-500 opacity-75 shadow-lg shadow-emerald-500/50 animate-bounce top-1/2" />
+            <div className="absolute inset-x-0 h-0.5 bg-emerald-500 opacity-75 shadow-lg shadow-emerald-500/50 animate-bounce top-1/2 z-10" />
 
             <div className="flex justify-between items-center z-10">
               <span className="text-xs bg-black/60 px-3 py-1 rounded-full border border-gray-700 font-semibold flex items-center gap-1.5">
@@ -258,14 +311,14 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
               </span>
               <button 
                 onClick={() => setIsScanning(false)}
-                className="text-xs text-gray-400 hover:text-white bg-black/40 p-1.5 rounded-full"
+                className="text-xs text-gray-400 hover:text-white bg-black/40 p-1.5 rounded-full cursor-pointer z-20"
               >
                 Cancel
               </button>
             </div>
 
             {/* Target Reticle */}
-            <div className="w-48 h-48 border-2 border-emerald-400/60 rounded-3xl mx-auto flex items-center justify-center border-dashed relative z-10 animate-pulse">
+            <div className="w-48 h-48 border-2 border-emerald-400/60 rounded-3xl mx-auto flex items-center justify-center border-dashed relative z-10 animate-pulse bg-black/10">
               <QrCode className="w-16 h-16 text-emerald-400/40" />
             </div>
 

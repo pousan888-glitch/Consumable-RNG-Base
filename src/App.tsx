@@ -127,7 +127,7 @@ export default function App() {
   };
 
   // Switch/Login user helper
-  const handleLogin = async (email: string, name?: string, role?: UserRole) => {
+  const handleLogin = async (email: string, name?: string, role?: UserRole, isSimulation = false) => {
     try {
       const response = await apiFetch('/api/auth/login', {
         method: 'POST',
@@ -139,6 +139,14 @@ export default function App() {
         const user = await response.json();
         setCurrentUser(user);
         localStorage.setItem('consumables_user_email', user.email);
+
+        if (!isSimulation) {
+          if (user.role === 'admin' || user.email.toLowerCase() === 'pousan888@gmail.com') {
+            localStorage.setItem('consumables_is_admin_tester', 'true');
+          } else {
+            localStorage.removeItem('consumables_is_admin_tester');
+          }
+        }
         
         // Handle language preference
         if (user.language) {
@@ -204,6 +212,7 @@ export default function App() {
   const handleLogout = () => {
     setCurrentUser(null);
     localStorage.removeItem('consumables_user_email');
+    localStorage.removeItem('consumables_is_admin_tester');
     // Clear URL query parameters for clean state
     if (window.location.search) {
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -246,8 +255,8 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-gray-800 antialiased">
       
       {/* Sandbox testing switcher */}
-      {currentUser && (
-        <RoleSwitcher currentUser={currentUser} onSelectUser={handleLogin} onResetDB={handleResetDB} />
+      {currentUser && localStorage.getItem('consumables_is_admin_tester') === 'true' && (
+        <RoleSwitcher currentUser={currentUser} onSelectUser={(email, name, role) => handleLogin(email, name, role, true)} onResetDB={handleResetDB} />
       )}
 
       {/* NAV HEADER */}
