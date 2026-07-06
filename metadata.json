@@ -1,0 +1,6 @@
+{
+  "name": "Warehouse Consumables Monitor",
+  "description": "Real-time warehouse and base consumables inventory system with role-based dashboards for Admin, Helper, and Quality Control, featuring QR code generation and smartphone QR counting.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
