@@ -550,3 +550,33 @@ export async function handleMockFetch(url: string, init?: RequestInit): Promise<
 
   return makeResponse({ error: 'Mock endpoint not found' }, 404);
 }
+
+export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const url = typeof input === 'string' ? input : (input instanceof URL ? input.href : input.url);
+  
+  if (url.startsWith('/api/')) {
+    const isOnVercel = typeof window !== 'undefined' && window.location.hostname.endsWith('.vercel.app');
+    const forceFallback = localStorage.getItem('force_fallback') === 'true';
+    
+    if (isOnVercel || forceFallback) {
+      return handleMockFetch(url, init);
+    }
+    
+    try {
+      const res = await fetch(input, init);
+      if (res.status === 404) {
+        console.warn(`[API 404] Endpoint not found: ${url}. Activating client-side fallback.`);
+        localStorage.setItem('force_fallback', 'true');
+        return handleMockFetch(url, init);
+      }
+      return res;
+    } catch (err) {
+      console.warn(`[API Error] Request failed to: ${url}. Activating client-side fallback.`, err);
+      localStorage.setItem('force_fallback', 'true');
+      return handleMockFetch(url, init);
+    }
+  }
+  
+  return fetch(input, init);
+}
+

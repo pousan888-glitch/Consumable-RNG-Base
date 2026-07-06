@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { InventoryDB, User, UserRole } from './types.js';
+import { apiFetch } from './apiFallback.js';
 import AdminDashboard from './components/AdminDashboard.js';
 import HelperCount from './components/HelperCount.js';
 import QCConsumption from './components/QCConsumption.js';
@@ -26,7 +27,7 @@ export default function App() {
   useEffect(() => {
     const fetchState = async () => {
       try {
-        const response = await fetch('/api/state');
+        const response = await apiFetch('/api/state');
         if (response.ok) {
           const data = await response.json();
           setDb(data);
@@ -73,7 +74,7 @@ export default function App() {
   // Switch/Login user helper
   const handleLogin = async (email: string, name?: string, role?: UserRole) => {
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name, role })
@@ -85,7 +86,7 @@ export default function App() {
         localStorage.setItem('consumables_user_email', user.email);
         
         // Refresh full DB to ensure custom users exist
-        const stateRes = await fetch('/api/state');
+        const stateRes = await apiFetch('/api/state');
         if (stateRes.ok) {
           const stateData = await stateRes.ok ? await stateRes.json() : db;
           setDb(stateData);
@@ -110,7 +111,7 @@ export default function App() {
   // Reset database helper
   const handleResetDB = async () => {
     try {
-      const response = await fetch('/api/reset', { method: 'POST' });
+      const response = await apiFetch('/api/reset', { method: 'POST' });
       if (response.ok) {
         const result = await response.json();
         setDb(result.db);

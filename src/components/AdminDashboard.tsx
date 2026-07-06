@@ -14,6 +14,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import { InventoryDB, ConsumableItem, Cabinet, Department, User, UserRole } from '../types.js';
+import { apiFetch } from '../apiFallback.js';
 
 interface AdminDashboardProps {
   db: InventoryDB;
@@ -60,7 +61,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
 
     if (editingItem && editingItem.id) {
       // Update
-      const response = await fetch(`/api/items/${editingItem.id}`, {
+      const response = await apiFetch(`/api/items/${editingItem.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -75,7 +76,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
       }
     } else {
       // Create
-      const response = await fetch('/api/items', {
+      const response = await apiFetch('/api/items', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
 
   const handleDeleteItem = async (itemId: string) => {
     if (confirm('Are you sure you want to delete this consumable?')) {
-      const response = await fetch(`/api/items/${itemId}`, {
+      const response = await apiFetch(`/api/items/${itemId}`, {
         method: 'DELETE',
         headers: { 'X-User-Email': currentUser.email }
       });
@@ -114,7 +115,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
     };
 
     if (editingItem && editingItem.id) {
-      const response = await fetch(`/api/cabinets/${editingItem.id}`, {
+      const response = await apiFetch(`/api/cabinets/${editingItem.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +128,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
         await onUpdateDB({ cabinets: db.cabinets.map(c => c.id === editingItem.id ? updatedCab : c) });
       }
     } else {
-      const response = await fetch('/api/cabinets', {
+      const response = await apiFetch('/api/cabinets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +147,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
 
   const handleDeleteCabinet = async (id: string) => {
     if (confirm('Deleting this cabinet will delete/unassign all items inside it. Continue?')) {
-      const response = await fetch(`/api/cabinets/${id}`, {
+      const response = await apiFetch(`/api/cabinets/${id}`, {
         method: 'DELETE',
         headers: { 'X-User-Email': currentUser.email }
       });
@@ -166,7 +167,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
     const deptData = { name: formData.get('name') as string };
 
     if (editingItem && editingItem.id) {
-      const response = await fetch(`/api/departments/${editingItem.id}`, {
+      const response = await apiFetch(`/api/departments/${editingItem.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -179,7 +180,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
         await onUpdateDB({ departments: db.departments.map(d => d.id === editingItem.id ? updated : d) });
       }
     } else {
-      const response = await fetch('/api/departments', {
+      const response = await apiFetch('/api/departments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +199,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
 
   const handleDeleteDept = async (id: string) => {
     if (confirm('Deleting this department will remove its consumables. Continue?')) {
-      const response = await fetch(`/api/departments/${id}`, {
+      const response = await apiFetch(`/api/departments/${id}`, {
         method: 'DELETE',
         headers: { 'X-User-Email': currentUser.email }
       });
@@ -223,7 +224,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
     };
 
     if (editingItem && editingItem.id) {
-      const response = await fetch(`/api/users/${editingItem.id}`, {
+      const response = await apiFetch(`/api/users/${editingItem.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -236,7 +237,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
         await onUpdateDB({ users: db.users.map(u => u.id === editingItem.id ? updated : u) });
       }
     } else {
-      const response = await fetch('/api/users', {
+      const response = await apiFetch('/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -260,7 +261,7 @@ export default function AdminDashboard({ db, currentUser, onUpdateDB }: AdminDas
       return;
     }
     if (confirm(`Are you sure you want to delete user ${targetUser?.name}?`)) {
-      const response = await fetch(`/api/users/${id}`, {
+      const response = await apiFetch(`/api/users/${id}`, {
         method: 'DELETE',
         headers: { 'X-User-Email': currentUser.email }
       });

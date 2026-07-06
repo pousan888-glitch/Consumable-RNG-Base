@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { InventoryDB, ConsumableItem, Cabinet, User } from '../types.js';
+import { apiFetch } from '../apiFallback.js';
 
 interface QCConsumptionProps {
   db: InventoryDB;
@@ -59,7 +60,7 @@ export default function QCConsumption({ db, currentUser, onUpdateDB }: QCConsump
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/logs/consumption', {
+      const response = await apiFetch('/api/logs/consumption', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

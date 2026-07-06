@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { InventoryDB, ConsumableItem, Cabinet, User } from '../types.js';
+import { apiFetch } from '../apiFallback.js';
 
 interface HelperCountProps {
   db: InventoryDB;
@@ -79,7 +80,7 @@ export default function HelperCount({ db, currentUser, onUpdateDB, preselectedCa
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/logs/inspection', {
+      const response = await apiFetch('/api/logs/inspection', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
