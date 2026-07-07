@@ -76,18 +76,26 @@ const initialDB: InventoryDB = {
   ]
 };
 
-// Initialize Firebase Admin
+// Initialize Firebase Admin with flexible environment variable support for production deployments
 let firebaseDb: Firestore | null = null;
 try {
   const configPath = path.join(process.cwd(), 'firebase-applet-config.json');
+  let projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
+  let databaseId = process.env.FIREBASE_DATABASE_ID;
+
   if (fs.existsSync(configPath)) {
     const firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    projectId = projectId || firebaseConfig.projectId;
+    databaseId = databaseId || firebaseConfig.firestoreDatabaseId;
+  }
+
+  if (projectId) {
     admin.initializeApp({
-      projectId: firebaseConfig.projectId,
+      projectId: projectId,
     });
-    if (firebaseConfig.firestoreDatabaseId) {
+    if (databaseId) {
       try {
-        firebaseDb = getFirestore(firebaseConfig.firestoreDatabaseId);
+        firebaseDb = getFirestore(databaseId);
       } catch (err) {
         console.warn('Failed to initialize Firestore with named database ID, falling back to default:', err);
         firebaseDb = getFirestore();
@@ -95,9 +103,9 @@ try {
     } else {
       firebaseDb = getFirestore();
     }
-    console.log('Firebase Admin initialized successfully with project:', firebaseConfig.projectId);
+    console.log('Firebase Admin initialized successfully with project:', projectId);
   } else {
-    console.warn('firebase-applet-config.json not found. Running in local-only mode.');
+    console.warn('firebase-applet-config.json not found and no environment variables supplied. Running in local-only mode.');
   }
 } catch (error) {
   console.error('Failed to initialize Firebase Admin:', error);

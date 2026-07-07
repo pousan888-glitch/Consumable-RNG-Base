@@ -1,10 +1,10 @@
 {
-  "projectId": "marklar-horizon-g9pl1",
-  "appId": "1:442887347911:web:2c4f9dcda252b64c97e8e2",
-  "apiKey": "AIzaSyAivsfy9ggmOaegLmxq9cEb7BxsLnt9cQ0",
-  "authDomain": "marklar-horizon-g9pl1.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-warehouseconsuma-96ec1942-bc66-49eb-9642-8879f13bbcda",
-  "storageBucket": "marklar-horizon-g9pl1.firebasestorage.app",
-  "messagingSenderId": "442887347911",
-  "measurementId": ""
+  "projectId": "consumable-rng-base",
+  "appId": "1:439799585400:web:60c7861c37095e43ad6b8d",
+  "apiKey": "AIzaSyDYnimQKbF6mb8_3GaO1y8mxEuy9ycjQh0",
+  "authDomain": "consumable-rng-base.firebaseapp.com",
+  "firestoreDatabaseId": "",
+  "storageBucket": "consumable-rng-base.firebasestorage.app",
+  "messagingSenderId": "439799585400",
+  "measurementId": "G-31JEL2DMXC"
 }
